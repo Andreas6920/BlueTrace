@@ -1,15 +1,17 @@
 # Module Execution
     function Import-RemoteModule {
         param([string]$Url)
-        # Create or make sure presence of temp folder
-            $modulePath = Join-Path $env:TEMP "BlueTrace-Modules"
-            if (-not (Test-Path $modulePath)) { New-Item $modulePath -ItemType Directory | Out-Null }
-        # Download file to temp folder
-            $localFile = Join-path -Path $modulePath -Childpath (Split-path $Url -Leaf)
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Invoke-RestMethod $Url -OutFile $localFile
-        # Execute file
-            . $localFile}
+            # Create or make sure presence of temp folder
+                $modulePath = Join-Path $env:TEMP "BlueTrace-Modules"
+                if (-not (Test-Path $modulePath)) { New-Item $modulePath -ItemType Directory | Out-Null }
+            # Download file to temp folder
+                $localFile = Join-path -Path $modulePath -Childpath (Split-path $Url -Leaf)
+                [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+                    # if older powershell (windows 7, Vista, Server 2008)
+                    if ($PSVersionTable.PSVersion.Major -lt 3) { Invoke-WebRequest -UseBasicParsing $Url -OutFile $localFile }
+                else {Invoke-RestMethod $Url -OutFile $localFile}
+            # Execute file
+                . $localFile}
 
 # Create a directory for all the logs
 
