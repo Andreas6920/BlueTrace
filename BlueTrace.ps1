@@ -32,20 +32,18 @@
             New-Item -Path $BasePath -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
             Write-Host "Log directory created: $BasePath" -f Green
 
-
-
-
-            
+           
 
 do {
     Write-Host "`n";
     Write-Host "`tMENU" -f Yellow;"";
-    Write-Host "`t[1] `tModule: Windows-Optimizer"
-    Write-Host "`t[2] `tModule: Windows-Server-Automator"
-    Write-Host "`t[3] `tInstall Microsoft Office 2016 Professional Retail"
-    Write-Host "`t[4] `tDownload Windows"
-    Write-Host "`t[5] `tActivate Microsoft Office"
-    Write-Host "`t[6] `tActivate Windows"
+    Write-Host "`t[1] `tNetwork Suite"
+    Write-Host "`t[2] `tProcess Suite"
+    Write-Host "`t[3] `tFiles Suite"
+    Write-Host "`t[4] `tPersistence Suite"
+    Write-Host "`t[5] `tZip and send logs"
+    Write-Host "`t[6] `tDownload Tools"
+    Write-Host "`t[6] `tIsolate Host"
     
     "";
     Write-Host "`t[0] - Exit"
