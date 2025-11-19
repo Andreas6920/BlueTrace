@@ -1,3 +1,15 @@
+$Banner = @"
+██████  ██      ██    ██ ███████ ████████ ██████   █████   ██████ ███████ 
+██   ██ ██      ██    ██ ██         ██    ██   ██ ██   ██ ██      ██      
+██████  ██      ██    ██ █████      ██    ██████  ███████ ██      █████   
+██   ██ ██      ██    ██ ██         ██    ██   ██ ██   ██ ██      ██      
+██████  ███████  ██████  ███████    ██    ██   ██ ██   ██  ██████ ███████ 
+"@
+
+$Version = '0.0.0'
+
+
+
 # Module Execution
     function Import-RemoteModule {
         param([string]$Url)
@@ -30,23 +42,34 @@
     # Create folder
         $BasePath = Join-Path -Path (Get-RootPath) -ChildPath (Get-RootFolder)
             New-Item -Path $BasePath -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-            Write-Host "Log directory created: $BasePath" -f Green
+            
 
-           
+Write-Host "`n"
+Write-Host $Banner -ForegroundColor Blue
+Write-Host "`n"
+Write-Host "Version : $Version | Developer: Andreas6920 | Github: https://github.com/andreas6920"
+Write-Host "`t - Logs: $BasePath"
+Write-Host "============================================================================="
 
-do {
+    do {
+    
+    
     Write-Host "`n";
     Write-Host "`tMENU" -f Yellow;"";
-    Write-Host "`t[1] `tNetwork Suite"
-    Write-Host "`t[2] `tProcess Suite"
-    Write-Host "`t[3] `tFiles Suite"
-    Write-Host "`t[4] `tPersistence Suite"
-    Write-Host "`t[5] `tZip and send logs"
-    Write-Host "`t[6] `tDownload Tools"
-    Write-Host "`t[6] `tIsolate Host"
+    Write-Host "`t[1] `tAuto-collect logs"
+    Write-Host "`t[2] `tHost Information" -NoNewline; Write-Host "`t`t// Host specs, network config, defender config..." -ForegroundColor Gray
+    Write-Host "`t[3] `tNetwork Suite" -NoNewline; Write-Host "`t`t`t// Network Connections DNS, IP, SMB, RDP..." -ForegroundColor Gray
+    Write-Host "`t[4] `tProcess Suite" -NoNewline; Write-Host "`t`t`t// Event viewer, Processes, Jobs, Services, Commands.." -ForegroundColor Gray
+    Write-Host "`t[5] `tFiles Suite"  -NoNewline; Write-Host "`t`t`t`t// File related artifacts..." -ForegroundColor Gray
+    Write-Host "`t[6] `tPersistence Suite" -NoNewline; Write-Host "`t`t// Startup items and keys..." -ForegroundColor Gray
+    Write-Host "`t[7] `tZip and send logs" -NoNewline; Write-Host "`t`t`t// Compress, Encrypt and Send logs" -ForegroundColor Gray
+    "";
+    Write-Host "`t[8] `tDownload Tools" -NoNewline; Write-Host "`t`t`t// Forensics and Incident Response Tools" -ForegroundColor Gray
+    "";
+    Write-Host "`t[9] `tIsolate Host"
     
     "";
-    Write-Host "`t[0] - Exit"
+    Write-Host "`t[0] `tExit"
     Write-Host ""; Write-Host "";
     Write-Host "`tOption: " -f Yellow -nonewline; ;
     $option = Read-Host
@@ -60,6 +83,6 @@ do {
         
 
         
-        Default {}}
-}
-while ($option -ne 6 )
+        Default {}}}
+    
+    while ($option -ne 9 )
