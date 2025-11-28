@@ -12,27 +12,48 @@ $Version = '0.0.0'
 
 # Module Execution
     function Import-RemoteModule {
-        param([string]$Url)
-            # Create or make sure presence of temp folder
-                $modulePath = Join-Path $env:TEMP "BlueTrace-Modules"
-                if (-not (Test-Path $modulePath)) { New-Item $modulePath -ItemType Directory | Out-Null }
-            # Download file to temp folder
-                $localFile = Join-path -Path $modulePath -Childpath (Split-path $Url -Leaf)
-                [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-                    # if older powershell (windows 7, Vista, Server 2008)
-                    if ($PSVersionTable.PSVersion.Major -lt 3) { Invoke-WebRequest -UseBasicParsing $Url -OutFile $localFile }
-                else {Invoke-RestMethod $Url -OutFile $localFile}
-            # Execute file
-                . $localFile}
+        param(
+            [Parameter(Mandatory = $true)]
+            [string]$Url)
+
+        # Create modules folder
+        $modulePath = Join-Path $env:TEMP "BlueTrace-Modules"
+        if (-not (Test-Path $modulePath)) { New-Item -ItemType Directory -Path $modulePath | Out-Null }
+
+        # Define scriptname
+        $FileName = Split-path $Url -Leaf
+        $localFile = Join-path $modulePath $FileName
+
+        # Ensure TLS 1.2 on older systems
+        try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
+
+        # Download script - Change download method for older systems.
+        $useIRM = $false
+        if ($PSVersionTable.PSVersion.Major -ge 5) { $useIRM = $true }
+        try {
+            if ($useIRM) {Invoke-RestMethod -Uri $Url -OutFile $localFile -ErrorAction Stop} 
+            else {Invoke-WebRequest -Uri $Url -OutFile $localFile -UseBasicParsing -ErrorAction Stop}}
+        catch {
+            throw "Download failed for $Url: $($_.Exception.Message)"}
+
+        # Execute script
+        . $localFile
+    }
 
 # Create a directory for all the logs
 
     # Define root path
     function Get-RootPath {
+        # Preferred: Desktop for interactive sessions
         $desktop = [Environment]::GetFolderPath("Desktop")
-        if ($desktop -and (Test-Path $desktop)) { return $desktop }
-            if ($env:SystemDrive -and (Test-Path $env:SystemDrive)) {return $env:SystemDrive}
-                if (Test-Path "C:\") {return "C:\"}}
+        if ($desktop -and (Test-Path $desktop) -and $env:USERNAME -ne "SYSTEM") {return $desktop}
+    
+        # Next: SystemDrive
+        if ($env:SystemDrive -and (Test-Path $env:SystemDrive)) {return $env:SystemDrive}
+
+        # Fallback: C:\
+        return "C:\"}
+
 
     # Define directory name
     function Get-RootFolder {
@@ -76,9 +97,9 @@ Write-Host "====================================================================
     Switch ($option) { 
         0 {exit}
         
-        1 {     Import-RemoteModule -Url "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Network-Interfaces.ps1"
-                $CSVFile = (Join-Path $BasePath "windows-activation.csv")
-                Network-Interfaces -Windows | Export-Csv $CSVFile}
+        2 {     Import-RemoteModule -Url "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Network-Interfaces.ps1"
+                $CSVFile = (Join-Path $BasePath "Network-Interfaces.csv")
+                Get-NetworkInterfaces | Export-Csv $CSVFile -NoTypeInformation}
 
         
 
