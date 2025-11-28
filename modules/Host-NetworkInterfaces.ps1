@@ -1,4 +1,4 @@
-function Get-NetworkInterfaces {
+function Get-HostNetworkInterfaces {
     [CmdletBinding()]
     param()
 

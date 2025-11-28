@@ -97,9 +97,9 @@ Write-Host "====================================================================
     Switch ($option) { 
         0 {exit}
         
-        2 {     Import-RemoteModule -Url "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Network-Interfaces.ps1"
+        2 {     Import-RemoteModule -Url "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Host-NetworkInterfaces.ps1"
                 $CSVFile = (Join-Path $BasePath "Network-Interfaces.csv")
-                Get-NetworkInterfaces | Export-Csv $CSVFile -NoTypeInformation}
+                Get-HostNetworkInterfaces | Export-Csv $CSVFile -NoTypeInformation}
 
         
 
