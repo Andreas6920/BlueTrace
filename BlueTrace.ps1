@@ -34,7 +34,7 @@ $Version = '0.0.0'
             if ($useIRM) {Invoke-RestMethod -Uri $Url -OutFile $localFile -ErrorAction Stop} 
             else {Invoke-WebRequest -Uri $Url -OutFile $localFile -UseBasicParsing -ErrorAction Stop}}
         catch {
-            throw "Download failed for $Url: $($_.Exception.Message)"}
+            throw "Download failed for $Url : $($_.Exception.Message)"}
 
         # Execute script
         . $localFile
