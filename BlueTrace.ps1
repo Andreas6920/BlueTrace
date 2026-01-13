@@ -97,11 +97,35 @@ Write-Host "====================================================================
     Switch ($option) { 
         0 {exit}
         
-        2 {     Import-RemoteModule -Url "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Host-NetworkInterfaces.ps1"
-                $CSVFile = (Join-Path $BasePath "Network-Interfaces.csv")
-                Get-HostNetworkInterfaces | Export-Csv $CSVFile -NoTypeInformation}
+        2 {     
+            
+            # System settings - AV Settings, Firewall Settings, Security Settings, Local Admins, PC Specs etc..
+            $CSVFile = (Join-Path $BasePath "Host-Information.csv")
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Get-HostInformation.ps1"
+            Invoke-RestMethod $Url | Invoke-Expression
+            Get-HostInformation | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+            
+            # Network settings - Network Interfaces, MACS, IPS
+            $CSVFile = (Join-Path $BasePath "Host-NetInterfaces.csv")
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Get-HostNetInterfaces.ps1"
+            Invoke-RestMethod $Url | Invoke-Expression
+            Get-HostNetworkInterfaces | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+            
+            # User sessions - Concurrent logged on users on system
+            $CSVFile = (Join-Path $BasePath "Host-LoggedOnUsers")
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Get-HostLoggedOnUsers.ps1"
+            Invoke-RestMethod $Url | Invoke-Expression
+            Get-HostLoggedOnUsers | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+        }
 
-        
+        3 {
+            
+            # Open TCP Connections (Netstat), binded with application and domain/ISP lookup
+            $CSVFile = (Join-Path $BasePath "Network-OpenConnections.csv")
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/Script/Get-NetStatInfo.ps1"
+            Invoke-RestMethod $Url | Invoke-Expression
+            Get-NetStatInfo | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+        }
 
         
         Default {}}}
