@@ -132,7 +132,5 @@ function Get-NetStatInfo {
     # ----------------------------
     # Output
     # ----------------------------
-    $Results = $Results | Sort-Object ISP, Domain
-
-    $Results | Format-Table -AutoSize
+    $Results | Sort-Object ISP, Domain
 }
