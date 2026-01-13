@@ -122,7 +122,7 @@ Write-Host "====================================================================
             
             # Open TCP Connections (Netstat), binded with application and domain/ISP lookup
             $CSVFile = (Join-Path $BasePath "Network-OpenConnections.csv")
-            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/Script/Get-NetStatInfo.ps1"
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/Script/Get-NetStatInfo"
             Invoke-RestMethod $Url | Invoke-Expression
             Get-NetStatInfo | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
         }
