@@ -101,31 +101,44 @@ Write-Host "====================================================================
             
             # System settings - AV Settings, Firewall Settings, Security Settings, Local Admins, PC Specs etc..
             $CSVFile = (Join-Path $BasePath "Host-Information.csv")
-            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/Script/Get-HostInformation.ps1"
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-HostInformation.ps1"
             Invoke-RestMethod $Url | Invoke-Expression
             Get-HostInformation | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
             
             # Network settings - Network Interfaces, MACS, IPS
             $CSVFile = (Join-Path $BasePath "Host-NetInterfaces.csv")
-            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/Script/Get-HostNetInterfaces.ps1"
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-HostNetInterfaces.ps1"
             Invoke-RestMethod $Url | Invoke-Expression
             Get-HostNetworkInterfaces | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
             
             # User sessions - Concurrent logged on users on system
             $CSVFile = (Join-Path $BasePath "Host-LoggedOnUsers")
-            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/Script/Get-HostLoggedOnUsers.ps1"
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-HostLoggedOnUsers.ps1"
             Invoke-RestMethod $Url | Invoke-Expression
             Get-HostLoggedOnUsers | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+
         }
 
         3 {
             
             # Open TCP Connections (Netstat), binded with application and domain/ISP lookup
-            $CSVFile = (Join-Path $BasePath "Network-OpenConnections.csv")
-            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/Script/Get-NetStatInfo"
-            Invoke-RestMethod $Url | Invoke-Expression
-            Get-NetStatInfo | Format-Table -AutoSize
-            Get-NetStatInfo | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+                $CSVFile = (Join-Path $BasePath "Network-OpenConnections.csv")
+                $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-NetStatInfo"
+                Invoke-RestMethod $Url | Invoke-Expression
+                Get-NetStatInfo | Format-Table -AutoSize
+                Get-NetStatInfo | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+
+        }
+
+        6 {
+
+            # Get all statupitems, Lookup the files in VirusTotal
+                $CSVFile = (Join-Path $BasePath "Persistence-StartupItems.csv")
+                $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-PersistenceItems"
+                Invoke-RestMethod $Url | Invoke-Expression
+                Get-PersistenceItems | Format-Table -AutoSize
+                Get-PersistenceItems | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+                
         }
 
         
