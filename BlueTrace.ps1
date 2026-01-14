@@ -81,9 +81,9 @@ Write-Host "====================================================================
     Write-Host "`t[2] `tHost Information" -NoNewline; Write-Host "`t`t// Host specs, network config, defender config..." -ForegroundColor Gray
     Write-Host "`t[3] `tNetwork Suite" -NoNewline; Write-Host "`t`t`t// Network Connections DNS, IP, SMB, RDP..." -ForegroundColor Gray
     Write-Host "`t[4] `tProcess Suite" -NoNewline; Write-Host "`t`t`t// Event viewer, Processes, Jobs, Services, Commands.." -ForegroundColor Gray
-    Write-Host "`t[5] `tFiles Suite"  -NoNewline; Write-Host "`t`t`t`t// File related artifacts..." -ForegroundColor Gray
+    Write-Host "`t[5] `tFiles Suite"  -NoNewline; Write-Host "`t`t`t// File related artifacts..." -ForegroundColor Gray
     Write-Host "`t[6] `tPersistence Suite" -NoNewline; Write-Host "`t`t// Startup items and keys..." -ForegroundColor Gray
-    Write-Host "`t[7] `tZip and send logs" -NoNewline; Write-Host "`t`t`t// Compress, Encrypt and Send logs" -ForegroundColor Gray
+    Write-Host "`t[7] `tZip and send logs" -NoNewline; Write-Host "`t`t// Compress, Encrypt and Send logs" -ForegroundColor Gray
     "";
     Write-Host "`t[8] `tDownload Tools" -NoNewline; Write-Host "`t`t`t// Forensics and Incident Response Tools" -ForegroundColor Gray
     "";
