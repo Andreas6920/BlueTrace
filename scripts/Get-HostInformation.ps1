@@ -70,14 +70,39 @@ function Get-HostInformation {
     }
     if ($otherAV) { $otherAV = $otherAV -join ", " } else { $otherAV = "" }
 
-    # Local admins
-    $localAdmins = Try-Exec {
+    $adminUsers = @()
+    $enabledLocalNonAdmins = @()
+
+    try {
         $adminGroup = Get-LocalGroup | Where-Object { $_.SID -eq 'S-1-5-32-544' }
+
         if ($adminGroup) {
-            Get-LocalGroupMember -Group $adminGroup.Name |
-                Select-Object -ExpandProperty Name
-        }}
-    if ($localAdmins) { $localAdmins = $localAdmins -join ", " } else { $localAdmins = "" }
+            $adminUsers = Get-LocalGroupMember -Group $adminGroup.Name -ErrorAction Stop |
+                Where-Object { $_.ObjectClass -eq 'User' } |
+                Select-Object -ExpandProperty Name |
+                Sort-Object -Unique
+        }
+
+        $localEnabled = Get-LocalUser -ErrorAction Stop |
+            Where-Object { $_.Enabled -eq $true } |
+            Select-Object -ExpandProperty Name
+
+        # Normalize admin names for comparison (handle both "PC\user" and "user")
+        $localAdminNames = $adminUsers | ForEach-Object {
+            if ($_ -like "*\*") { ($_ -split '\\', 2)[1] } else { $_ }
+        } | Sort-Object -Unique
+
+        $enabledLocalNonAdmins = $localEnabled |
+            Where-Object { $localAdminNames -notcontains $_ } |
+            Sort-Object -Unique
+    }
+    catch {
+        $adminUsers = @()
+        $enabledLocalNonAdmins = @()}
+
+    $adminUsersStr = if ($adminUsers) { $adminUsers -join ", " } else { "None" }
+    $enabledLocalNonAdminsStr = if ($enabledLocalNonAdmins) { $enabledLocalNonAdmins -join ", " } else { "None" }
+
 
     # System drive size
     $systemDriveSize = if ($disk) { 
@@ -93,7 +118,8 @@ function Get-HostInformation {
     $obj = [PSCustomObject]@{
         Hostname              = $env:COMPUTERNAME
         Domain                = $cs.Domain
-        LocalAdmins           = $localAdmins
+        AdminUsers            = $adminUsersStr
+        NonAdminUsers         = $enabledLocalNonAdminsStr
         OSName                = $os.Caption
         OSVersion             = $os.Version
         OSBuild               = $os.BuildNumber
