@@ -7,7 +7,7 @@ function Get-PersistenceItems {
     
     # Download and Load VirustTotal Module
         $VirusTotalModuleUri  = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/modules/Start-VirusTotalLookup.ps1"
-        $VirusTotalModulePath = Join-Path $env:ProgramData "AM\Modules\Start-VirusTotalLookup.ps1"
+        $VirusTotalModulePath = Join-Path $env:ProgramData "BlueTrace\Modules\Start-VirusTotalLookup.ps1"
 
             # Create subfolder
                 try {

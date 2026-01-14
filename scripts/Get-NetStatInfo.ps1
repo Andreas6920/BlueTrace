@@ -29,7 +29,7 @@ function Get-NetStatInfo {
 
     # Load Start-AbuseIPDBLookup from GitHub (always attempt)
     $LookupUri  = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Start-AbuseIPDBLookup.ps1"
-    $LookupPath = Join-Path $env:ProgramData "AM\Modules\Start-AbuseIPDBLookup.ps1"
+    $LookupPath = Join-Path $env:ProgramData "BlueTrace\Modules\Start-AbuseIPDBLookup.ps1"
 
     $LookupAvailable = $false
     try {
