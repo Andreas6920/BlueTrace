@@ -112,7 +112,7 @@ Write-Host "====================================================================
             Get-HostNetworkInterfaces | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
             
             # User sessions - Concurrent logged on users on system
-            $CSVFile = (Join-Path $BasePath "Host-LoggedOnUsers")
+            $CSVFile = (Join-Path $BasePath "Host-LoggedOnUsers.csv")
             $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-HostLoggedOnUsers.ps1"
             Invoke-RestMethod $Url | Invoke-Expression
             Get-HostLoggedOnUsers | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
@@ -134,7 +134,7 @@ Write-Host "====================================================================
 
             # Get all statupitems, Lookup the files in VirusTotal
             $CSVFile = (Join-Path $BasePath "Persistence-StartupItems.csv")
-            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-PersistenceItem.ps1"
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-PersistenceItems.ps1"
             Invoke-RestMethod $Url | Invoke-Expression
             Get-PersistenceItems | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
 
@@ -147,7 +147,7 @@ Write-Host "====================================================================
             # NOT confirmed healthy
             $unhealthy = Import-Csv $CSVFile | Where-Object { ($_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -lt 68) -or $_.KnownToVirusTotal -eq 'False' }  | Select-Object FilePath, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Permalink | Format-Table -AutoSize
             If ($null -ne $unhealthy){
-                Write-host "SUSPECIOUS - HIGH DETECTION RATE OR UNKNOWN STARTUPITEMS, HAVE A LOOK:" -BackgroundColor Red -ForegroundColor White
+                Write-host "SUSPECIOUS - HIGH DETECTION RATE OR UNKNOWN STARTUP ITEMS, HAVE A LOOK:" -BackgroundColor Red -ForegroundColor White
                 $unhealthy}
 
         }
