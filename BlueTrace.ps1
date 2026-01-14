@@ -109,7 +109,7 @@ Write-Host "====================================================================
             $CSVFile = (Join-Path $BasePath "Host-NetInterfaces.csv")
             $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-HostNetInterfaces.ps1"
             Invoke-RestMethod $Url | Invoke-Expression
-            Get-HostNetworkInterfaces | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+            Get-HostNetInterfaces | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
             
             # User sessions - Concurrent logged on users on system
             $CSVFile = (Join-Path $BasePath "Host-LoggedOnUsers.csv")
