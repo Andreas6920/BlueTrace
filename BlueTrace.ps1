@@ -138,26 +138,17 @@ Write-Host "====================================================================
             Invoke-RestMethod $Url | Invoke-Expression
             Get-PersistenceItems | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
 
-            # Healthy
-            $healthy = Import-Csv $CSVFile| Where-Object { $_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -gt 67 } | Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink | Format-Table -AutoSize
+            # Confirmed Healthy
+            $healthy = Import-Csv $CSVFile | Where-Object { $_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -gt 67 } | Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Permalink | Format-Table -AutoSize
             If ($null -ne $healthy){
-            Write-host "`n`nKNOWN HEALTHY" -ForegroundColor Green
-            $healthy}
+                Write-host "`n`n CONFIRMED KNOWN HEALTHY STARTUP ITEMS:" -BackgroundColor DarkGreen -ForegroundColor White
+                $healthy}
             
-            # Some Detection
-            Write-host "HIGH DETECTIONS: Take these for further inspections" -ForegroundColor Red
-            Import-Csv $CSVFile|
-            Where-Object { $_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -lt 67 } |
-            Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink |
-            Format-Table -AutoSize
-
-            # Uknowrn
-            Write-host "UNKNOWN FILES: Dont ignore these!!" -For Red
-            Import-Csv $CSVFile|
-            Where-Object { $_.KnownToVirusTotal -eq 'False'} |
-            Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink |
-            Format-Table -AutoSize
-
+            # NOT confirmed healthy
+            $unhealthy = Import-Csv $CSVFile | Where-Object { ($_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -lt 68) -or $_.KnownToVirusTotal -eq 'False' }  | Select-Object FilePath, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Permalink | Format-Table -AutoSize
+            If ($null -ne $unhealthy){
+                Write-host "SUSPECIOUS - HIGH DETECTION RATE OR UNKNOWN STARTUPITEMS, HAVE A LOOK:" -BackgroundColor Red -ForegroundColor White
+                $unhealthy}
 
         }
 

