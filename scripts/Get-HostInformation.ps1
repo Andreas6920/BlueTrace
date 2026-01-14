@@ -70,6 +70,7 @@ function Get-HostInformation {
     }
     if ($otherAV) { $otherAV = $otherAV -join ", " } else { $otherAV = "" }
 
+    # Users
     $adminUsers = @()
     $enabledLocalNonAdmins = @()
 
@@ -94,8 +95,8 @@ function Get-HostInformation {
 
         $enabledLocalNonAdmins = $localEnabled |
             Where-Object { $localAdminNames -notcontains $_ } |
-            Sort-Object -Unique
-    }
+            Sort-Object -Unique}
+    
     catch {
         $adminUsers = @()
         $enabledLocalNonAdmins = @()}
