@@ -72,9 +72,11 @@ function Get-HostInformation {
 
     # Local admins
     $localAdmins = Try-Exec {
-        Get-LocalGroupMember -Group "Administrators" |
-            Select-Object -ExpandProperty Name
-    }
+        $adminGroup = Get-LocalGroup | Where-Object { $_.SID -eq 'S-1-5-32-544' }
+        if ($adminGroup) {
+            Get-LocalGroupMember -Group $adminGroup.Name |
+                Select-Object -ExpandProperty Name
+        }}
     if ($localAdmins) { $localAdmins = $localAdmins -join ", " } else { $localAdmins = "" }
 
     # System drive size
@@ -91,6 +93,7 @@ function Get-HostInformation {
     $obj = [PSCustomObject]@{
         Hostname              = $env:COMPUTERNAME
         Domain                = $cs.Domain
+        LocalAdmins           = $localAdmins
         OSName                = $os.Caption
         OSVersion             = $os.Version
         OSBuild               = $os.BuildNumber
@@ -122,7 +125,6 @@ function Get-HostInformation {
         RDPEenabled           = $rdpStatus
         FirewallProfiles      = $fwState
         OtherAntivirus        = $otherAV
-        LocalAdmins           = $localAdmins
     }
 
     return $obj
