@@ -123,7 +123,7 @@ Write-Host "====================================================================
             
             # Open TCP Connections (Netstat), binded with application and domain/ISP lookup
             $CSVFile = (Join-Path $BasePath "Network-OpenConnections.csv")
-            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-NetStatInfo"
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-NetStatInfo.ps1"
             Invoke-RestMethod $Url | Invoke-Expression
             Get-NetStatInfo | Format-Table -AutoSize
             Get-NetStatInfo | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
@@ -134,10 +134,30 @@ Write-Host "====================================================================
 
             # Get all statupitems, Lookup the files in VirusTotal
             $CSVFile = (Join-Path $BasePath "Persistence-StartupItems.csv")
-            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-PersistenceItems"
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-PersistenceItem.ps1"
             Invoke-RestMethod $Url | Invoke-Expression
-            Get-PersistenceItems | Format-Table -AutoSize
             Get-PersistenceItems | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+
+            # Healthy
+            $healthy = Import-Csv C:\per.csv | Where-Object { $_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -gt 67 } | Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink | Format-Table -AutoSize
+            If ($null -ne $healthy){
+            Write-host "`n`nKNOWN HEALTHY" -ForegroundColor Green
+            $healthy}
+            
+            # Some Detection
+            Write-host "HIGH DETECTIONS: Take these for further inspections" -ForegroundColor Red
+            Import-Csv C:\per.csv |
+            Where-Object { $_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -lt 67 } |
+            Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink |
+            Format-Table -AutoSize
+
+            # Uknowrn
+            Write-host "UNKNOWN FILES: Dont ignore these!!" -For Red
+            Import-Csv C:\per.csv |
+            Where-Object { $_.KnownToVirusTotal -eq 'False'} |
+            Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink |
+            Format-Table -AutoSize
+
 
         }
 
