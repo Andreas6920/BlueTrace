@@ -122,23 +122,23 @@ Write-Host "====================================================================
         3 {
             
             # Open TCP Connections (Netstat), binded with application and domain/ISP lookup
-                $CSVFile = (Join-Path $BasePath "Network-OpenConnections.csv")
-                $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-NetStatInfo"
-                Invoke-RestMethod $Url | Invoke-Expression
-                Get-NetStatInfo | Format-Table -AutoSize
-                Get-NetStatInfo | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+            $CSVFile = (Join-Path $BasePath "Network-OpenConnections.csv")
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-NetStatInfo"
+            Invoke-RestMethod $Url | Invoke-Expression
+            Get-NetStatInfo | Format-Table -AutoSize
+            Get-NetStatInfo | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
 
         }
 
         6 {
 
             # Get all statupitems, Lookup the files in VirusTotal
-                $CSVFile = (Join-Path $BasePath "Persistence-StartupItems.csv")
-                $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-PersistenceItems"
-                Invoke-RestMethod $Url | Invoke-Expression
-                Get-PersistenceItems | Format-Table -AutoSize
-                Get-PersistenceItems | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
-                
+            $CSVFile = (Join-Path $BasePath "Persistence-StartupItems.csv")
+            $Url = "https://raw.githubusercontent.com/Andreas6920/BlueTrace/refs/heads/main/scripts/Get-PersistenceItems"
+            Invoke-RestMethod $Url | Invoke-Expression
+            Get-PersistenceItems | Format-Table -AutoSize
+            Get-PersistenceItems | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
+
         }
 
         
