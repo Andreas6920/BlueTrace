@@ -139,21 +139,21 @@ Write-Host "====================================================================
             Get-PersistenceItems | Export-Csv -Path $CSVFile -NoTypeInformation -Encoding UTF8 -Force
 
             # Healthy
-            $healthy = Import-Csv C:\per.csv | Where-Object { $_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -gt 67 } | Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink | Format-Table -AutoSize
+            $healthy = Import-Csv $CSVFile| Where-Object { $_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -gt 67 } | Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink | Format-Table -AutoSize
             If ($null -ne $healthy){
             Write-host "`n`nKNOWN HEALTHY" -ForegroundColor Green
             $healthy}
             
             # Some Detection
             Write-host "HIGH DETECTIONS: Take these for further inspections" -ForegroundColor Red
-            Import-Csv C:\per.csv |
+            Import-Csv $CSVFile|
             Where-Object { $_.KnownToVirusTotal -eq 'True' -and [int]$_.Undetected -lt 67 } |
             Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink |
             Format-Table -AutoSize
 
             # Uknowrn
             Write-host "UNKNOWN FILES: Dont ignore these!!" -For Red
-            Import-Csv C:\per.csv |
+            Import-Csv $CSVFile|
             Where-Object { $_.KnownToVirusTotal -eq 'False'} |
             Select-Object EntryName, KnownToVirusTotal, Harmless, Malicious, Suspicious, Undetected, Timeout, Permalink |
             Format-Table -AutoSize
