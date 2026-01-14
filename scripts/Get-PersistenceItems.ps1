@@ -135,8 +135,7 @@ function Get-PersistenceItems {
     # Final deduplication    
     $raw = $raw | Sort-Object SourceType, SourcePath, EntryName, CommandLine, FilePath -Unique
 
-    # Enrich with hash + VirusTotal
-        
+    # Enrich with hash + VirusTotal    
     foreach ($i in $raw) {
         $resolvedPath = $null
         $sha = $null
