@@ -9,7 +9,6 @@ function Get-HostInformation {
     # Core WMI / CIM
     $os   = Try-Exec { Get-CimInstance Win32_OperatingSystem }
     $cs   = Try-Exec { Get-CimInstance Win32_ComputerSystem }
-    $bios = Try-Exec { Get-CimInstance Win32_BIOS }
     $cpu  = Try-Exec { Get-CimInstance Win32_Processor }
     $disk = Try-Exec { Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'" }
 
@@ -20,6 +19,13 @@ function Get-HostInformation {
             Get-CimInstance -Namespace "root/Microsoft/Windows/Defender" -ClassName MSFT_MpComputerStatus 
         }
     }
+
+    <#
+    (Get-MpPreference).ExclusionPath
+    (Get-MpPreference).ExclusionExtension
+    (Get-MpPreference).ExclusionProcess
+    (Get-MpPreference).ExclusionIpAddress
+    #>
 
     # BitLocker
     $bitlocker = Try-Exec { Get-BitLockerVolume -MountPoint "C:" }
@@ -119,6 +125,7 @@ function Get-HostInformation {
     $obj = [PSCustomObject]@{
         Hostname              = $env:COMPUTERNAME
         Domain                = $cs.Domain
+        UserExecuting         = $env:USERNAME
         AdminUsers            = $adminUsersStr
         NonAdminUsers         = $enabledLocalNonAdminsStr
         OSName                = $os.Caption
@@ -128,11 +135,9 @@ function Get-HostInformation {
 
         LastBoot              = $lastBoot
         UptimeHours           = $uptimeHours
-        UserExecuting         = $env:USERNAME
 
         Manufacturer          = $cs.Manufacturer
         Model                 = $cs.Model
-        BIOSVersion           = $bios.SMBIOSBIOSVersion
 
         CPUName               = $cpu.Name
 
@@ -148,6 +153,7 @@ function Get-HostInformation {
         DefenderEnabled       = if ($defender) { $defender.AntivirusEnabled } else { "" }
         DefenderRealTime      = if ($defender) { $defender.RealTimeProtectionEnabled } else { "" }
         DefenderSignatureAge  = if ($defender) { $defender.AntivirusSignatureLastUpdated } else { "" }
+        # Defender Exclusions
 
         RDPEenabled           = $rdpStatus
         FirewallProfiles      = $fwState
